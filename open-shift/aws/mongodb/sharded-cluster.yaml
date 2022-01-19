@@ -48,11 +48,11 @@ spec:
           - name: mongodb-enterprise-database
             resources:
               limits:
-                cpu: "2"
-                memory: 2000M
+                cpu: "4"
+                memory: 4000M
               requests:
-                cpu: "1.8"
-                memory: 1900M
+                cpu: "3.8"
+                memory: 3500M
 
   mongosPodSpec:
     podTemplate:
@@ -61,8 +61,8 @@ spec:
           - name: mongodb-enterprise-database
             resources:
               limits:
-                cpu: "1.3"
-                memory: 1100M
+                cpu: "3.3"
+                memory: 2500M
               requests:
-                cpu: "1.2"
-                memory: 1024M
+                cpu: "3"
+                memory: 2424M
