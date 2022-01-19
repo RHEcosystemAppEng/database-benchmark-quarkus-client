@@ -66,5 +66,30 @@ Response is in JSON format:
   "requestsPerSecond" : 1137.0
 }
 ```
+
+**Sharding the collection**
+
+```shell
+sh.enableSharding("fruits")
+//we need to have hashed index on the shard key. Hashed index is a different index than regular index.
+db.demo.fruit.ensureIndex({_id: "hashed"})
+//shard the collection now
+sh.shardCollection("fruits.demo.fruit",{"_id":"hashed"})
+```
+
+```shell
+//If you want to see the data distribution among shards of a collection
+db.demo.fruit.getShardDistribution()
+```
+
+```shell
+//To see if the mongo sharding cluster balancer enabled or not
+sh.getBalancerState()
+
+//enabling the balancer
+sh.startBalancer() 
+```
+
+
 **Note** The `index` attribute in `minResponseTime` and `maxResponseTime` respresent the (first) index of the request
 for which that time what calculated
