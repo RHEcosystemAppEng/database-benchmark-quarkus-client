@@ -16,7 +16,7 @@ spec:
         - name: private-reg-cred
       containers:
         - name: database-benchmark-container
-          image: quay.io/lrangine/database-benchmark-client:2.0.0-SNAPSHOT
+          image: quay.io/lrangine/database-benchmark-client:3.0.0-SNAPSHOT
           imagePullPolicy: Always
           resources:
             limits:
