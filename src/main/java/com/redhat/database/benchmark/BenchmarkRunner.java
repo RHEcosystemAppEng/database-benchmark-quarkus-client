@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.redhat.database.benchmark.mongo.crud.Fruit;
 import com.redhat.database.benchmark.mongo.crud.FruitService;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +13,7 @@ import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +28,7 @@ public class BenchmarkRunner {
     private Logger logger = LoggerFactory.getLogger(BenchmarkRunner.class);
 
     @Inject
-    private FruitService fruitService;
+    FruitService fruitService;
 
     public String run(String testType, int durationInSeconds, int noOfThreads) throws JsonProcessingException,
             InterruptedException {
@@ -109,18 +108,11 @@ public class BenchmarkRunner {
             return dbOperation;
         }
 
-        private Supplier<Fruit> restMongoFruitData = () -> {
-            Fruit fruit = new Fruit();
-            fruit.setName("Apple");
-            fruit.setDescription("Daily an apple keeps doctor away..!!");
-            return fruit;
-        };
+        private Supplier<Fruit> mongoNewFruitData = () -> new Fruit(UUID.randomUUID().toString(), "Apple","Daily an apple keeps doctor away..!!" );
 
-        private Supplier<String> mongoGetData = () -> {
-            return "1";
-        };
+        private Supplier<String> mongoGetData = () -> "1";
 
-        private final DatabaseOperation mongoWriteOperation = () -> fruitService.add(restMongoFruitData.get());
+        private final DatabaseOperation mongoWriteOperation = () -> fruitService.add(mongoNewFruitData.get());
 
         private final DatabaseOperation mongoReadOperation = () -> fruitService.get(mongoGetData.get());
 

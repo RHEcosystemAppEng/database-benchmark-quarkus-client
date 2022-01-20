@@ -6,12 +6,13 @@ public class Fruit {
 
     private String name;
     private String description;
-    private String id;
+    private String uuid;
 
     public Fruit() {
     }
 
-    public Fruit(String name, String description) {
+    public Fruit(String uuid, String name, String description) {
+        this.uuid = uuid;
         this.name = name;
         this.description = description;
     }
@@ -48,11 +49,11 @@ public class Fruit {
         return Objects.hash(this.name);
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getUuid() {
+        return uuid;
     }
 
-    public String getId() {
-        return id;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }
