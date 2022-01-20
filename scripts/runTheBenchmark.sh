@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Example run
-# ./runTheBenchmark.sh mongodb-benchmark-replica-set-1  database-benchmark-quarkus-client-867485c897-kfdx2
+# ./runTheBenchmark.sh mongo-sharded-benchmark-mongos-0  database-benchmark-quarkus-client-69fb768b67-dffgr > sharded-aws-mongo-benchmark.log
 
 MONGO_POD_NAME=$1   # Mongo Pod Name from Open Shift Cluster
 BENCHMARK_CLIENT_POD_NAME=$2     # benchmark client Pod Name from Open Shift Cluster

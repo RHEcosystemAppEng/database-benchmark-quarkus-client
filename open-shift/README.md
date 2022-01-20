@@ -12,7 +12,7 @@ mvn clean package -Dquarkus.container-image.build=true
 docker image tag lrangine/database-benchmark-client:1.0.0-SNAPSHOT quay.io/lrangine/database-benchmark-client:2.0.0-SNAPSHOT
 docker image push quay.io/lrangine/database-benchmark-client:2.0.0-SNAPSHOT
 ```
-**Step 2:** Deploy the Mongo DB on Open Shift. All the yaml files required for the setup are available in the [folder](./aws/mongodb). You can refer mongodb documentation or [Mongo Ops Manager Setup](https://github.com/lokeshrangineni/kogito-benchmark/tree/main/sharded-mongodb#mongodb-sharded-cluster-setup-on-open-shift).
+**Step 2:** Deploy the Mongo DB on Open Shift. All the yaml files required for the setup are available in the [folder](./aws/mongodb). You can find the [documentation](./aws/mongodb/README.md) or refer mongo DB documentation. 
 
 **Step 3:** Create the [secret-database-benchmark-mongo-con-string.yaml](secret-database-benchmark-mongo-con-string.yaml) so that database benchmark application can refer it during run time in the next step. App refers to the key `connectionString.standard`. In this way it is easier to modify during run time.
 
