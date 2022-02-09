@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.redhat.database.benchmark.mongo.crud.Fruit;
 import com.redhat.database.benchmark.mongo.crud.FruitService;
+import com.redhat.database.benchmark.postgres.crud.MovieService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,9 @@ public class BenchmarkRunner {
 
     @Inject
     FruitService fruitService;
+
+    @Inject
+    MovieService movieService;
 
     public String run(String testType, int durationInSeconds, int noOfThreads) throws JsonProcessingException,
             InterruptedException {
@@ -112,7 +116,9 @@ public class BenchmarkRunner {
 
         private Supplier<String> mongoGetData = () -> "1";
 
-        private final DatabaseOperation mongoWriteOperation = () -> fruitService.add(mongoNewFruitData.get());
+        //private final DatabaseOperation mongoWriteOperation = () -> fruitService.add(mongoNewFruitData.get());
+
+        private final DatabaseOperation mongoWriteOperation = () -> movieService.save("new test movie");
 
         private final DatabaseOperation mongoReadOperation = () -> fruitService.get(mongoGetData.get());
 
