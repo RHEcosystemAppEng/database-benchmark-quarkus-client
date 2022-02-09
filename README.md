@@ -38,6 +38,40 @@ quarkus.mongodb.connection-string=mongodb://localhost:34000
 mongo mongodb://developer:password@localhost:34000
 ```
 
+### Running the application by setting up Postgres locally
+
+```shell
+# Install postgres with brew on mac
+brew install postgresql
+
+# Start PostgreSQL
+brew services start postgresql
+
+# Start using PostgreSQL
+psql postgres
+
+# Create new user and assign roles
+CREATE ROLE newuser WITH LOGIN PASSWORD 'password';
+
+# make the newuser capable of creating, editing, and deleting databases
+ALTER ROLE newuser CREATEDB;
+
+# Quit psql terminal to be able to login using newuser
+\q
+
+# Go back to psql terminal, with `newuser` as user
+psql postgres -U newuser
+
+# Observe that from `postgres=#`, the psql terminal instead shows 
+`postgres=>`
+
+# Modify application.properties with the environment variables you set
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/db
+quarkus.datasource.username=newuser
+quarkus.datasource.password=password
+```
+
 
 ### Running the benchmark
 
