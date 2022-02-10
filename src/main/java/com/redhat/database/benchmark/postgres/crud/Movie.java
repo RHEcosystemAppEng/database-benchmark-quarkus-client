@@ -1,4 +1,8 @@
 package com.redhat.database.benchmark.postgres.crud;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.pgclient.PgPool;
@@ -6,10 +10,11 @@ import io.vertx.mutiny.sqlclient.Row;
 import io.vertx.mutiny.sqlclient.Tuple;
 import io.vertx.sqlclient.RowSet;
 
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class Movie {
 
-    private Long id;
-    private String title;
+    public Long id;
+    public String title;
 
     public Movie(Long id, String title) {
         this.id = id;
