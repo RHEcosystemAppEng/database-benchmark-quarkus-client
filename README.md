@@ -4,6 +4,7 @@
   * [Running the Database benchmark in Development mode](#running-the-database-benchmark-in-development-mode)
     + [Launching the application](#launching-the-application)
     + [Running the application by connecting to Mongo on Openshift](#running-the-application-by-connecting-to-mongo-on-openshift)
+    + [Running the application by setting up Postgres](#running-the-application-by-setting-up-postgres)
     + [Running the benchmark](#running-the-benchmark)
   * [Deploying the application on to Open Shift Cluster](#deploying-the-application-on-to-open-shift-cluster)
   * [Running the Benchmark for multiple users](#running-the-benchmark-for-multiple-users)
@@ -36,6 +37,43 @@ quarkus.mongodb.connection-string=mongodb://localhost:34000
 
 # Connect to mongo using mongo CLI tool.
 mongo mongodb://developer:password@localhost:34000
+```
+
+### Running the application by setting up Postgres
+
+```shell
+# Install postgres with brew on mac
+brew install postgresql
+
+# Start PostgreSQL
+brew services start postgresql
+
+# Start using PostgreSQL
+psql postgres
+
+# Create new user and assign roles
+CREATE ROLE newuser WITH LOGIN PASSWORD 'password';
+
+# make the newuser capable of creating, editing, and deleting databases
+ALTER ROLE newuser CREATEDB;
+
+# Quit psql terminal to be able to login using newuser
+\q
+
+# Go back to psql terminal, with `newuser` as user
+psql postgres -U newuser
+
+# Observe that from `postgres=#`, the psql terminal instead shows 
+`postgres=>`
+
+# Or spin up postgres container 
+podman run --name psql-container -p 5432 -e POSTGRES_USER=newuser -e POSTGRES_PASSWORD=password -e POSTGRES_DB=mydb postgres
+
+# Modify application.properties with the environment variables you set
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/db
+quarkus.datasource.username=newuser
+quarkus.datasource.password=password
 ```
 
 
