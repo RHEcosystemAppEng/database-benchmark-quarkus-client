@@ -34,6 +34,7 @@ oc port-forward mongodb-benchmark-replica-set-0 34000:27017
 
 # add/update the configuration in Application.properties
 quarkus.mongodb.connection-string=mongodb://localhost:34000
+quarkus.app.benchmark.database-kind=mongo
 
 # Connect to mongo using mongo CLI tool.
 mongo mongodb://developer:password@localhost:34000
@@ -42,36 +43,14 @@ mongo mongodb://developer:password@localhost:34000
 ### Running the application by setting up Postgres
 
 ```shell
-# Install postgres with brew on mac
-brew install postgresql
-
-# Start PostgreSQL
-brew services start postgresql
-
-# Start using PostgreSQL
-psql postgres
-
-# Create new user and assign roles
-CREATE ROLE newuser WITH LOGIN PASSWORD 'password';
-
-# make the newuser capable of creating, editing, and deleting databases
-ALTER ROLE newuser CREATEDB;
-
-# Quit psql terminal to be able to login using newuser
-\q
-
-# Go back to psql terminal, with `newuser` as user
-psql postgres -U newuser
-
-# Observe that from `postgres=#`, the psql terminal instead shows 
-`postgres=>`
-
 # Or spin up postgres container 
-podman run --name psql-container -p 5432 -e POSTGRES_USER=newuser -e POSTGRES_PASSWORD=password -e POSTGRES_DB=mydb postgres
+podman run --name psql-container -p 5432:5432 -e POSTGRES_USER=newuser -e POSTGRES_PASSWORD=Password1 -e POSTGRES_DB=mydb postgres
 
 # Modify application.properties with the environment variables you set
+quarkus.app.benchmark.database-kind=rdbms
+
 quarkus.datasource.db-kind=postgresql
-quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/db
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/mydb
 quarkus.datasource.username=newuser
 quarkus.datasource.password=password
 ```

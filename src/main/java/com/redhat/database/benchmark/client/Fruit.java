@@ -1,4 +1,4 @@
-package com.redhat.database.benchmark.mongo.crud;
+package com.redhat.database.benchmark.client;
 
 import java.util.Objects;
 
@@ -7,9 +7,6 @@ public class Fruit {
     private String name;
     private String description;
     private String uuid;
-
-    public Fruit() {
-    }
 
     public Fruit(String uuid, String name, String description) {
         this.uuid = uuid;

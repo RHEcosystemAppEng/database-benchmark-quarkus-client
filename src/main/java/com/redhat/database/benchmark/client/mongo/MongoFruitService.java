@@ -1,7 +1,9 @@
-package com.redhat.database.benchmark.mongo.crud;
+package com.redhat.database.benchmark.client.mongo;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.redhat.database.benchmark.client.IBenchmarkService;
+import com.redhat.database.benchmark.client.Fruit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,20 +13,19 @@ import javax.inject.Inject;
 import static com.mongodb.client.model.Filters.eq;
 
 @ApplicationScoped
-public class FruitService {
-    private Logger logger = LoggerFactory.getLogger(FruitService.class);
-
+public class MongoFruitService implements IBenchmarkService {
+    private Logger logger = LoggerFactory.getLogger(MongoFruitService.class);
 
     @Inject
-    private Instance<MongoClient> mongoClientInstance;
+    Instance<MongoClient> mongoClientInstance;
 
-
+    @Override
     public Fruit add(Fruit fruit) {
-        logger.info("Fruit {} is added..!!",getCollection().insertOne(fruit).getInsertedId().toString());
-        //logger.info("Fruit {} is added..!!",fruit);
+        logger.debug("Fruit {} is added..!!",getCollection().insertOne(fruit).getInsertedId().toString());
         return fruit;
     }
 
+    @Override
     public Fruit get(String id) {
         return getCollection().find(eq("id", id)).first();
     }

@@ -3,9 +3,8 @@ package com.redhat.database.benchmark;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.redhat.database.benchmark.mongo.crud.Fruit;
-import com.redhat.database.benchmark.mongo.crud.FruitService;
-import com.redhat.database.benchmark.postgres.crud.MovieService;
+import com.redhat.database.benchmark.client.BenchmarkServiceFactory;
+import com.redhat.database.benchmark.client.Fruit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,17 +26,13 @@ import java.util.stream.IntStream;
 @ApplicationScoped
 public class BenchmarkRunner {
     private Logger logger = LoggerFactory.getLogger(BenchmarkRunner.class);
-
     @Inject
-    FruitService fruitService;
-
-    @Inject
-    MovieService movieService;
+    BenchmarkServiceFactory benchmarkServiceFactory;
 
     public String run(String testType, int durationInSeconds, int noOfThreads) throws JsonProcessingException,
             InterruptedException {
         TestMetrics metrics = new Worker(testType, durationInSeconds, noOfThreads).run();
-        return new ObjectMapper().writeValueAsString(metrics);
+        return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(metrics);
     }
 
     private class Worker {
@@ -71,8 +66,8 @@ public class BenchmarkRunner {
                 }
             }, durationInSeconds * 1000);
 
-            Collection<Callable<Void>> callables = IntStream.rangeClosed(1, noOfThreads).mapToObj(n -> newCallable())
-                    .collect(Collectors.toList());
+            Collection<Callable<Void>> callables =
+                    IntStream.rangeClosed(1, noOfThreads).mapToObj(n -> newCallable()).collect(Collectors.toList());
             executor.invokeAll(callables);
 
             TestMetrics metrics = stats.build();
@@ -117,12 +112,9 @@ public class BenchmarkRunner {
 
         private Supplier<String> mongoGetData = () -> "1";
 
-        // private final DatabaseOperation mongoWriteOperation = () ->
-        // fruitService.add(mongoNewFruitData.get());
+        private final DatabaseOperation mongoWriteOperation = () -> benchmarkServiceFactory.getBenchmarkService().add(mongoNewFruitData.get());
 
-        private final DatabaseOperation mongoWriteOperation = () -> movieService.save("new test movie");
-
-        private final DatabaseOperation mongoReadOperation = () -> fruitService.get(mongoGetData.get());
+        private final DatabaseOperation mongoReadOperation = () -> benchmarkServiceFactory.getBenchmarkService().get(mongoGetData.get());
 
     }
 

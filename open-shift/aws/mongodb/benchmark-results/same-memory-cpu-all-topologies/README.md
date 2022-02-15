@@ -12,7 +12,7 @@ Worker nodes - 4
 16 vCPU and 32 GB of memory
 ## Replicaset
 
-[Replicaset Full Spec](../replica-set.yaml)
+[Replicaset Full Spec](../../replica-set.yaml)
 
 **Pod Resources Spec**
 ```yaml
@@ -50,11 +50,11 @@ data-ops-manager-db-1                  Bound    pvc-2298e718-5295-4b92-a4d6-26d1
 data-ops-manager-db-2                  Bound    pvc-c307e010-3d1e-4ba0-be60-156fa6b0db6c   15Gi       RWO            gp2            120m
 ```
 
-![Replicaset-memory-cpu.jpg](./memory-cpu-images/Replicaset-memory-cpu.jpg)
+![Replicaset-memory-cpu.jpg](memory-cpu-images/Replicaset-memory-cpu.jpg)
 
 ## Standalone
 
-[Standalone Full Spec](../standalone.yaml)
+[Standalone Full Spec](../../standalone.yaml)
 
 **Pod Resource Spec**
 
@@ -101,7 +101,7 @@ data-ops-manager-db-2                  Bound    pvc-c307e010-3d1e-4ba0-be60-156f
 
 ## Sharded Cluster
 
-[Sharded Cluster Full Spec](../sharded-cluster.yaml)
+[Sharded Cluster Full Spec](../../sharded-cluster.yaml)
 
 **Pod Resource Spec**
 
@@ -168,6 +168,6 @@ data-ops-manager-db-2                   Bound    pvc-c307e010-3d1e-4ba0-be60-156
 ```
 
 
-![Sharded-mongod-cpu.jpg](./memory-cpu-images/Sharded-mongod-cpu.jpg)
-![Sharded-mongod-memory.jpg](./memory-cpu-images/Sharded-mongod-memory.jpg)
-![Sharded-mongos-cpu-and-memory.jpg](./memory-cpu-images/Sharded-mongos-cpu-and-memory.jpg)
+![Sharded-mongod-cpu.jpg](memory-cpu-images/Sharded-mongod-cpu.jpg)
+![Sharded-mongod-memory.jpg](memory-cpu-images/Sharded-mongod-memory.jpg)
+![Sharded-mongos-cpu-and-memory.jpg](memory-cpu-images/Sharded-mongos-cpu-and-memory.jpg)
