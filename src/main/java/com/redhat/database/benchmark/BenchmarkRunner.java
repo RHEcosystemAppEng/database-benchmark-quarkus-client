@@ -3,8 +3,9 @@ package com.redhat.database.benchmark;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.redhat.database.benchmark.client.BenchmarkServiceFactory;
-import com.redhat.database.benchmark.client.Fruit;
+import com.redhat.database.benchmark.client.Message;
+import com.redhat.database.benchmark.client.amq.MessageProducerService;
+import com.redhat.database.benchmark.client.amq.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,12 @@ import java.util.stream.IntStream;
 @ApplicationScoped
 public class BenchmarkRunner {
     private Logger logger = LoggerFactory.getLogger(BenchmarkRunner.class);
+
     @Inject
-    BenchmarkServiceFactory benchmarkServiceFactory;
+    MessageProducerService messageProducerService;
+
+    @Inject
+    MessageService messageService;
 
     public String run(String testType, int durationInSeconds, int noOfThreads) throws JsonProcessingException,
             InterruptedException {
@@ -56,6 +61,10 @@ public class BenchmarkRunner {
                     testType,
                     noOfThreads);
             ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
+            logger.info("Total Number of Records before deleting all messages -{}", messageService.getMessagesCount());
+            messageService.deleteAllMessages();
+            logger.info("Total Number of Records after deleting all messages -{}", messageService.getMessagesCount());
+
             Timer timer = new Timer("timer");
             timer.schedule(new TimerTask() {
                 @Override
@@ -72,6 +81,10 @@ public class BenchmarkRunner {
 
             TestMetrics metrics = stats.build();
             logger.info("Completed {} tests in {}ms", metrics.getNoOfExecutions(), metrics.getElapsedTimeMillis());
+
+            messageService.printMessages();
+            logger.info("Total Number of Records - {}", messageService.getMessagesCount());
+
             return metrics;
         }
 
@@ -95,31 +108,26 @@ public class BenchmarkRunner {
 
         private DatabaseOperation executorOfType() {
             DatabaseOperation dbOperation = null;
-            switch (testType) {
-                case "databaseRead":
-                    dbOperation = mongoReadOperation;
-                    break;
-                case "databaseWrite":
+            if (testType.equalsIgnoreCase("databaseWrite")) {
                     dbOperation = mongoWriteOperation;
-                    break;
             }
             logger.info("Executor Type, DatabaseOperation: {},{}", testType, dbOperation);
             return dbOperation;
         }
 
-        private Supplier<Fruit> mongoNewFruitData = () -> new Fruit(UUID.randomUUID().toString(), "Apple",
+        private Supplier<Message> mongoNewFruitData = () -> new Message(UUID.randomUUID().toString(), "Apple",
                 "Daily an apple keeps doctor away..!!");
 
         private Supplier<String> mongoGetData = () -> "1";
 
-        private final DatabaseOperation mongoWriteOperation = () -> benchmarkServiceFactory.getBenchmarkService().add(mongoNewFruitData.get());
+        private final DatabaseOperation mongoWriteOperation = () -> messageProducerService.send(mongoNewFruitData.get());
 
-        private final DatabaseOperation mongoReadOperation = () -> benchmarkServiceFactory.getBenchmarkService().get(mongoGetData.get());
+        //private final DatabaseOperation mongoReadOperation = () -> benchmarkServiceFactory.getBenchmarkService().get(mongoGetData.get());
 
     }
 
     @FunctionalInterface
     interface DatabaseOperation {
-        Fruit execute() throws Exception;
+        Message execute() throws Exception;
     }
 }

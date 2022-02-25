@@ -1,14 +1,17 @@
 package com.redhat.database.benchmark.client;
 
+import java.sql.Timestamp;
 import java.util.Objects;
 
-public class Fruit {
+public class Message {
 
     private String name;
     private String description;
     private String uuid;
+    private Timestamp sent;
+    private Timestamp received;
 
-    public Fruit(String uuid, String name, String description) {
+    public Message(String uuid, String name, String description) {
         this.uuid = uuid;
         this.name = name;
         this.description = description;
@@ -32,11 +35,11 @@ public class Fruit {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Fruit)) {
+        if (!(obj instanceof Message)) {
             return false;
         }
 
-        Fruit other = (Fruit) obj;
+        Message other = (Message) obj;
 
         return Objects.equals(other.name, this.name);
     }
@@ -52,5 +55,25 @@ public class Fruit {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Timestamp getSent() {
+        return sent;
+    }
+
+    public Message setSent(Timestamp sent) {
+        this.sent = sent;
+        return this;
+    }
+
+
+
+    public Timestamp getReceived() {
+        return received;
+    }
+
+    public Message setReceived(Timestamp received) {
+        this.received = received;
+        return this;
     }
 }
