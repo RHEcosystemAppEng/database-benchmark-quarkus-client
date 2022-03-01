@@ -8,9 +8,10 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.sql.*;
 
-@ApplicationScoped
+@Singleton
 public class MessageService {
 
     private Logger logger = LoggerFactory.getLogger(MessageService.class);
@@ -89,15 +90,14 @@ public class MessageService {
         }
     }
 
-    public void updateMessage(Message message) {
-
-
+    public int updateMessage(Message message) {
+        int result = -1;
         try (Connection connection = h2DataSource.getConnection()) {
             final String SQL = "UPDATE FRUITS SET RECEIVED=? WHERE GEN_UUID=? AND RECEIVED IS NULL ";
             try (PreparedStatement stmt = connection.prepareStatement(SQL)) {
                 stmt.setTimestamp(1,message.getReceived());
                 stmt.setString(2, message.getUuid());
-                int result = stmt.executeUpdate();
+                result = stmt.executeUpdate();
                 logger.info("Message is updated in h2 database ={}",result);
             } catch (SQLException e) {
                 logger.error("Error processing updateMessage statement", e);
@@ -107,9 +107,10 @@ public class MessageService {
             logger.error("Error processing updateMessage connection", e);
             throw new RuntimeException(e);
         }
+        return result;
     }
 
-    public void printMessages() {
+    public void printTopHunMessages() {
 
 
         try (Connection connection = h2DataSource.getConnection()) {
@@ -144,9 +145,29 @@ public class MessageService {
         }
     }
 
+    public long getNumberOfMessages(Timestamp received) {
+        long rowCount = -1;
+        try (Connection connection = h2DataSource.getConnection()) {
+            final String SQL = "SELECT count(*) as row_count FROM FRUITS where received <= ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(SQL)) {
+                pstmt.setTimestamp(1, received);
+                ResultSet resultSet = pstmt.executeQuery();
+                while (resultSet.next()) {
+                    // Now we can fetch the data by column name, save and use them!
+                    rowCount = resultSet.getLong("row_count");
+                }
+            } catch (SQLException e) {
+                logger.error("Error processing updateMessage statement", e);
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            logger.error("Error processing updateMessage connection", e);
+            throw new RuntimeException(e);
+        }
+        return rowCount;
+    }
 
     public int getMessagesCount() {
-
         int rowCount = -1;
         try (Connection connection = h2DataSource.getConnection()) {
             final String SQL = "SELECT count(*) as row_count FROM FRUITS ";

@@ -14,18 +14,14 @@ public class MessageConsumerService {
     private final Logger logger = Logger.getLogger(MessageConsumerService.class);
 
     @Inject
-    AgroalDataSource h2DataSource;
-
-
-    @Inject
     MessageService messageService;
 
-
-
-
- /*   @Incoming("fruits-in")*/
+    @Incoming("fruits-in")
     public void receive(Message message) {
-        messageService.updateMessage(message.setReceived(Timestamp.from(Instant.now())));
+       int updatedCount = messageService.updateMessage(message.setReceived(Timestamp.from(Instant.now())));
+       if(updatedCount == -1 || updatedCount == 0){
+           logger.errorf("Message is received but there is no source message record - message UID={} ", message.getUuid());
+       }
        logger.infof("Got a message: %d - %s", message.getName(), message.getDescription());
     }
 }

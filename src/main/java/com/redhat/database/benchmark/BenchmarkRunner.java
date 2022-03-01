@@ -34,9 +34,11 @@ public class BenchmarkRunner {
     @Inject
     MessageService messageService;
 
+
+
     public String run(String testType, int durationInSeconds, int noOfThreads) throws JsonProcessingException,
             InterruptedException {
-        TestMetrics metrics = new Worker(testType, durationInSeconds, noOfThreads).run();
+        TestMetrics metrics = new Worker(testType, durationInSeconds, noOfThreads, messageService).run();
         return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(metrics);
     }
 
@@ -46,14 +48,12 @@ public class BenchmarkRunner {
         private int noOfThreads;
         private AtomicLong itemsCounter = new AtomicLong(0);
         AtomicBoolean timerElapsed = new AtomicBoolean(false);
-
         private Stats stats;
-
-        private Worker(String testType, int durationInSeconds, int noOfThreads) {
+        private Worker(String testType, int durationInSeconds, int noOfThreads, MessageService messageService) {
             this.testType = testType;
             this.durationInSeconds = durationInSeconds;
             this.noOfThreads = noOfThreads;
-            this.stats = new Stats();
+            this.stats = new Stats(messageService);
         }
 
         private TestMetrics run() throws InterruptedException {
@@ -79,10 +79,10 @@ public class BenchmarkRunner {
                     IntStream.rangeClosed(1, noOfThreads).mapToObj(n -> newCallable()).collect(Collectors.toList());
             executor.invokeAll(callables);
 
-            TestMetrics metrics = stats.build();
+           TestMetrics metrics = stats.build();
             logger.info("Completed {} tests in {}ms", metrics.getNoOfExecutions(), metrics.getElapsedTimeMillis());
 
-            messageService.printMessages();
+            messageService.printTopHunMessages();
             logger.info("Total Number of Records - {}", messageService.getMessagesCount());
 
             return metrics;
@@ -109,20 +109,16 @@ public class BenchmarkRunner {
         private DatabaseOperation executorOfType() {
             DatabaseOperation dbOperation = null;
             if (testType.equalsIgnoreCase("databaseWrite")) {
-                    dbOperation = mongoWriteOperation;
+                    dbOperation = newMessageSendOperation;
             }
             logger.info("Executor Type, DatabaseOperation: {},{}", testType, dbOperation);
             return dbOperation;
         }
 
-        private Supplier<Message> mongoNewFruitData = () -> new Message(UUID.randomUUID().toString(), "Apple",
+        private Supplier<Message> newMessageData = () -> new Message(UUID.randomUUID().toString(), "Apple",
                 "Daily an apple keeps doctor away..!!");
 
-        private Supplier<String> mongoGetData = () -> "1";
-
-        private final DatabaseOperation mongoWriteOperation = () -> messageProducerService.send(mongoNewFruitData.get());
-
-        //private final DatabaseOperation mongoReadOperation = () -> benchmarkServiceFactory.getBenchmarkService().get(mongoGetData.get());
+        private final DatabaseOperation newMessageSendOperation = () -> messageProducerService.send(newMessageData.get());
 
     }
 

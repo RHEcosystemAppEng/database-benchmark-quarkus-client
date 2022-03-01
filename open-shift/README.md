@@ -72,14 +72,14 @@ Response is in JSON format:
 ```shell
 sh.enableSharding("fruits")
 //we need to have hashed index on the shard key. Hashed index is a different index than regular index.
-db.demo.fruit.ensureIndex({_id: "hashed"})
+db.demo.message.ensureIndex({_id: "hashed"})
 //shard the collection now
-sh.shardCollection("fruits.demo.fruit",{"_id":"hashed"})
+sh.shardCollection("fruits.demo.message",{"_id":"hashed"})
 ```
 
 ```shell
 //If you want to see the data distribution among shards of a collection
-db.demo.fruit.getShardDistribution()
+db.demo.message.getShardDistribution()
 ```
 
 ```shell
