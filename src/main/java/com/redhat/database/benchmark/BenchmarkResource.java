@@ -16,9 +16,9 @@ public class BenchmarkResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @Path("/{testType}/{durationInSeconds}/{noOfThreads}")
-    public String run(@PathParam("testType") String testType, @PathParam("durationInSeconds") int durationInSeconds,
+    @Path("/{testType}/{durationInSeconds}/{receiveWaitTimeInSeconds}/{noOfThreads}")
+    public String run(@PathParam("testType") String testType, @PathParam("durationInSeconds") int durationInSeconds, @PathParam("receiveWaitTimeInSeconds") int receiveWaitTimeInSeconds,
                       @PathParam("noOfThreads") int noOfThreads) throws JsonProcessingException, InterruptedException {
-        return benchmarkRunner.run(testType, durationInSeconds, noOfThreads);
+        return benchmarkRunner.run(testType, durationInSeconds, receiveWaitTimeInSeconds, noOfThreads);
     }
 }

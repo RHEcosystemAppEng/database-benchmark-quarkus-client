@@ -43,10 +43,12 @@ public class Stats {
         noOfFailures += execution.isFailed() ? 1 : 0;
     }
 
-    public TestMetrics build() {
-        Instant endTime = Instant.now();
-        Duration testDuration = Duration.between(startTime, endTime);
-        long noOfRequests = messageService.getNumberOfMessages(Timestamp.from(endTime));
+    public TestMetrics build(int receiveWaitTimeInSeconds) throws InterruptedException {
+        Instant producerEndTime = Instant.now();
+        Thread.sleep(receiveWaitTimeInSeconds*1000);
+        Duration testDuration = Duration.between(startTime, producerEndTime);
+        Instant consumerEndTime = Instant.now();
+        long noOfRequests = messageService.getNumberOfMessages(Timestamp.from(consumerEndTime));
         TestMetrics metrics = new TestMetrics();
         metrics.setNoOfExecutions(noOfRequests);
         metrics.setTotalMessagesSent(messageService.getMessagesCount());

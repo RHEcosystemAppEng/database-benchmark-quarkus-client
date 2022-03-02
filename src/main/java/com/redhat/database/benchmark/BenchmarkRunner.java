@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -36,23 +37,25 @@ public class BenchmarkRunner {
 
 
 
-    public String run(String testType, int durationInSeconds, int noOfThreads) throws JsonProcessingException,
+    public String run(String testType, int durationInSeconds, int receiveWaitTimeInSeconds, int noOfThreads) throws JsonProcessingException,
             InterruptedException {
-        TestMetrics metrics = new Worker(testType, durationInSeconds, noOfThreads, messageService).run();
+        TestMetrics metrics = new Worker(testType, durationInSeconds, receiveWaitTimeInSeconds, noOfThreads, messageService).run();
         return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(metrics);
     }
 
     private class Worker {
         private String testType;
         private int durationInSeconds;
+        private int receiveWaitTimeInSeconds;
         private int noOfThreads;
         private AtomicLong itemsCounter = new AtomicLong(0);
         AtomicBoolean timerElapsed = new AtomicBoolean(false);
         private Stats stats;
-        private Worker(String testType, int durationInSeconds, int noOfThreads, MessageService messageService) {
+        private Worker(String testType, int durationInSeconds, int receiveWaitTimeInSeconds, int noOfThreads, MessageService messageService) {
             this.testType = testType;
             this.durationInSeconds = durationInSeconds;
             this.noOfThreads = noOfThreads;
+            this.receiveWaitTimeInSeconds = receiveWaitTimeInSeconds;
             this.stats = new Stats(messageService);
         }
 
@@ -79,11 +82,10 @@ public class BenchmarkRunner {
                     IntStream.rangeClosed(1, noOfThreads).mapToObj(n -> newCallable()).collect(Collectors.toList());
             executor.invokeAll(callables);
 
-           TestMetrics metrics = stats.build();
-            logger.info("Completed {} tests in {}ms", metrics.getNoOfExecutions(), metrics.getElapsedTimeMillis());
-
-            messageService.printTopHunMessages();
-            logger.info("Total Number of Records - {}", messageService.getMessagesCount());
+           TestMetrics metrics = stats.build(receiveWaitTimeInSeconds);
+           logger.info("Completed {} tests in {}ms", metrics.getNoOfExecutions(), metrics.getElapsedTimeMillis());
+           messageService.printTopHunMessages();
+           logger.info("Total Number of Records - {}", messageService.getMessagesCount());
 
             return metrics;
         }

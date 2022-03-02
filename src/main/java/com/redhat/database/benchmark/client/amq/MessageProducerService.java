@@ -6,6 +6,7 @@ import io.agroal.api.AgroalDataSource;
 
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.eclipse.microprofile.reactive.messaging.OnOverflow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,8 @@ public class MessageProducerService {
     private Logger logger = LoggerFactory.getLogger(MessageProducerService.class);
 
     @Inject
-    @Channel("fruits-out")
+    @Channel("exampleQueue-out")
+    @OnOverflow(value = OnOverflow.Strategy.UNBOUNDED_BUFFER)
     Emitter<Message> emitter;
 
     @Inject
