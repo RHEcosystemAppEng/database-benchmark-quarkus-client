@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,33 +34,36 @@ public class BenchmarkRunner {
     @Inject
     MessageService messageService;
 
+   @Inject
+   ErrorDaoService errorDaoService;
+
+    @Inject
+    StatsService statsService;
 
 
-    public String run(String testType, int durationInSeconds, int receiveWaitTimeInSeconds, int noOfThreads) throws JsonProcessingException,
+    public String run(int durationInSeconds, int receiveWaitTimeInSeconds, int noOfThreads) throws JsonProcessingException,
             InterruptedException {
-        TestMetrics metrics = new Worker(testType, durationInSeconds, receiveWaitTimeInSeconds, noOfThreads, messageService).run();
+        new Worker(durationInSeconds, noOfThreads, errorDaoService).run();
+        TestMetrics metrics = statsService.buildMetrics(receiveWaitTimeInSeconds);
         return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(metrics);
     }
 
     private class Worker {
-        private String testType;
         private int durationInSeconds;
-        private int receiveWaitTimeInSeconds;
         private int noOfThreads;
         private AtomicLong itemsCounter = new AtomicLong(0);
         AtomicBoolean timerElapsed = new AtomicBoolean(false);
-        private Stats stats;
-        private Worker(String testType, int durationInSeconds, int receiveWaitTimeInSeconds, int noOfThreads, MessageService messageService) {
-            this.testType = testType;
+
+        private ErrorDaoService errorDaoService;
+
+        private Worker(int durationInSeconds, int noOfThreads, ErrorDaoService errorDaoService) {
             this.durationInSeconds = durationInSeconds;
             this.noOfThreads = noOfThreads;
-            this.receiveWaitTimeInSeconds = receiveWaitTimeInSeconds;
-            this.stats = new Stats(messageService);
+            this.errorDaoService = errorDaoService;
         }
 
-        private TestMetrics run() throws InterruptedException {
-            logger.info("Ready to run for {} seconds of type '{}' in {} threads", durationInSeconds,
-                    testType,
+        private void run() throws InterruptedException {
+            logger.info("Ready to run for {} seconds in {} threads", durationInSeconds,
                     noOfThreads);
             ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
             logger.info("Total Number of Records before deleting all messages -{}", messageService.getMessagesCount());
@@ -81,40 +83,22 @@ public class BenchmarkRunner {
             Collection<Callable<Void>> callables =
                     IntStream.rangeClosed(1, noOfThreads).mapToObj(n -> newCallable()).collect(Collectors.toList());
             executor.invokeAll(callables);
-
-           TestMetrics metrics = stats.build(receiveWaitTimeInSeconds);
-           logger.info("Completed {} tests in {}ms", metrics.getNoOfExecutions(), metrics.getElapsedTimeMillis());
-           messageService.printTopHunMessages();
-           logger.info("Total Number of Records - {}", messageService.getMessagesCount());
-
-            return metrics;
         }
 
         private Callable<Void> newCallable() {
             return () -> {
                 while (!timerElapsed.get()) {
                     long index = itemsCounter.incrementAndGet();
-                    Execution execution = stats.startOne(index);
                     try {
                         logger.info("Executing: {}", index);
-                        executorOfType().execute();
-                        execution.stop();
+                        newMessageSendOperation.execute();
                     } catch (Exception e) {
                         logger.error("Failed to run: {}", e.getMessage());
-                        execution.failed();
+                        errorDaoService.insertError(e.getMessage());
                     }
                 }
                 return null;
             };
-        }
-
-        private DatabaseOperation executorOfType() {
-            DatabaseOperation dbOperation = null;
-            if (testType.equalsIgnoreCase("databaseWrite")) {
-                    dbOperation = newMessageSendOperation;
-            }
-            logger.info("Executor Type, DatabaseOperation: {},{}", testType, dbOperation);
-            return dbOperation;
         }
 
         private Supplier<Message> newMessageData = () -> new Message(UUID.randomUUID().toString(), "Apple",

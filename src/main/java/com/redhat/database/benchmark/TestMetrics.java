@@ -11,9 +11,9 @@ import lombok.Data;
 @Data
 public class TestMetrics {
 
-    private long noOfExecutions;
+    private long messagesReceived;
     private long noOfFailures;
-    private double requestsPerSecond;
+    private double messagesReceivedPerSecond;
 
     private long elapsedTimeMillis;
     private long totalMessagesSent;
@@ -26,12 +26,12 @@ public class TestMetrics {
         this.totalMessagesSent = totalMessagesSent;
     }
 
-    public Long getNoOfExecutions() {
-        return noOfExecutions;
+    public Long getMessagesReceived() {
+        return messagesReceived;
     }
 
-    public void setNoOfExecutions(Long noOfExecutions) {
-        this.noOfExecutions = noOfExecutions;
+    public void setMessagesReceived(Long messagesReceived) {
+        this.messagesReceived = messagesReceived;
     }
 
     public Long getNoOfFailures() {
@@ -50,11 +50,11 @@ public class TestMetrics {
         this.elapsedTimeMillis = elapsedTimeMillis;
     }
 
-    public double getRequestsPerSecond() {
-        return requestsPerSecond;
+    public double getMessagesReceivedPerSecond() {
+        return messagesReceivedPerSecond;
     }
 
-    public void setRequestsPerSecond(double requestsPerSecond) {
-        this.requestsPerSecond = requestsPerSecond;
+    public void setMessagesReceivedPerSecond(double messagesReceivedPerSecond) {
+        this.messagesReceivedPerSecond = messagesReceivedPerSecond;
     }
 }

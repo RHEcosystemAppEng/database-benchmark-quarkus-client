@@ -1,6 +1,5 @@
 package com.redhat.database.benchmark.client.amq;
 import com.redhat.database.benchmark.client.Message;
-import io.agroal.api.AgroalDataSource;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
 
