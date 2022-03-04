@@ -36,50 +36,43 @@ mvn quarkus:dev
 
 The client application exposes an API that can be used to start the test:
 ```properties
-http://localhost:9090/benchmark/TEST_DURATION/THREADS
+http://localhost:9090/benchmark/TEST_DURATION_IN_SECONDS/RECEIVE_WAIT_TIME_IN_SECONDS/THREADS
 ```
 Where:
-* TYPE can be any of:
-  * `databaseWrite`: Does write to the database mentioned as part of the JDBC URL. At this moment only mongo supported. 
-  * `databaseRead`: Does read to the database mentioned as part of the JDBC URL. At this moment only mongo supported and reads the record with ID=1. We can extend the functionality based on requirement.
-* DURATION is the duration in seconds of the test
+* TEST_DURATION_IN_SECONDS is the time duration to send the messages from the producer service.
+* RECEIVE_WAIT_TIME_IN_SECONDS This is the amount of time benchmark will wait for the consumer service to receive the messages. During this period no messages will be sent.
 * THREADS is the number of parallel threads to spawn (AKA number of users)
-
-
 
 Examples:
 ```shell
- curl -X GET http://localhost:9090/benchmark/databaseWrite/120/3
+ curl -X GET http://localhost:9090/benchmark/120/30/1
 ```
+Above curl command will trigger the benchmark - 120 seconds will constantly send messages and after that wait for 30 seconds so that consumer can receive possible amount of messages. 
+
 Result is in JSON format:
 ```json
 {
-  "noOfExecutions" : 34135,
+  "messagesReceived" : 2285,
   "noOfFailures" : 0,
-  "minResponseTime" : {
-    "index" : 615,
-    "responseTime" : 1
-  },
-  "maxResponseTime" : {
-    "index" : 9144,
-    "responseTime" : 80
-  },
-  "averageResponseTime" : 2,
-  "percentile95" : 3,
-  "percentile99" : 4,
-  "totalTimeMillis" : 74882,
-  "elapsedTimeMillis" : 30010,
-  "requestsPerSecond" : 1137.0
+  "messagesReceivedPerSecond" : 19.0,
+  "elapsedTimeMillis" : 120149,
+  "totalMessagesSent" : 161462
+}        
+```
+
+Below API will expose the metrics to get the metrics during the time of benchmarking.
+
+
+```shell
+curl http://localhost:9090/benchmark/intermittent-metrics
+```
+
+```json
+{
+  "messagesReceived" : 2052,
+  "noOfFailures" : 0,
+  "messagesReceivedPerSecond" : 16.0,
+  "elapsedTimeMillis" : 124944,
+  "totalMessagesSent" : 147776
 }
 ```
-**Note** The `index` attribute in `minResponseTime` and `maxResponseTime` represent the (first) index of the request 
-for which that time what calculated
-
-## Deploying the application on to Open Shift Cluster
-Refer [Deploying the application on to Open Shift Cluster](./open-shift/)
-
-## Running the Benchmark for multiple users
-Refer [Running the benchmark for multiple users in automated way](./scripts/)
-
-
-curl http://localhost:9090/benchmark/intermittent-metrics
