@@ -2,8 +2,6 @@ package com.redhat.database.benchmark.client.amq;
 
 import com.redhat.database.benchmark.client.Message;
 
-import io.agroal.api.AgroalDataSource;
-
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.OnOverflow;
@@ -26,13 +24,12 @@ public class MessageProducerService {
     Emitter<Message> emitter;
 
     @Inject
-    MessageService messageService;
+    MessageDaoService messageDaoService;
 
     public Message send(Message message) {
         emitter.send(message.setSent(Timestamp.from(Instant.now())));
-
         //insert the record asynchronously.
-        CompletableFuture.runAsync(() -> messageService.insertMessage(message));
+        CompletableFuture.runAsync(() -> messageDaoService.insertMessage(message));
 
         return message;
     }

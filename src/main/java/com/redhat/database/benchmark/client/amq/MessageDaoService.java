@@ -6,15 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.sql.*;
 
 @Singleton
-public class MessageService {
+public class MessageDaoService {
 
-    private Logger logger = LoggerFactory.getLogger(MessageService.class);
+    private Logger logger = LoggerFactory.getLogger(MessageDaoService.class);
 
     @Inject
     AgroalDataSource h2DataSource;
@@ -125,7 +124,8 @@ public class MessageService {
                     String name = resultSet.getString("name");
                     Timestamp received = resultSet.getTimestamp("received");
                     Timestamp sent = resultSet.getTimestamp("sent");
-                    long diff = received.getTime() - sent.getTime();
+                    long diff = resultSet.getLong("diff");
+
 
                     System.out.println("\tid: " + id +
                             ", uuid: " + uuid +

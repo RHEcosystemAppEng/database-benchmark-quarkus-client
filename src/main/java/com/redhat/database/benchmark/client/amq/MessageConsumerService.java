@@ -13,14 +13,14 @@ public class MessageConsumerService {
     private final Logger logger = Logger.getLogger(MessageConsumerService.class);
 
     @Inject
-    MessageService messageService;
+    MessageDaoService messageDaoService;
 
     @Incoming("exampleQueue-in")
     public void receive(Message message) {
-        logger.infof("Message is Received.. Hurray.. {}", message.getUuid());
-       int updatedCount = messageService.updateMessage(message.setReceived(Timestamp.from(Instant.now())));
+        logger.info("Message is Received.. Hurray.. "+ message.getUuid());
+       int updatedCount = messageDaoService.updateMessage(message.setReceived(Timestamp.from(Instant.now())));
        if(updatedCount == -1 || updatedCount == 0){
-           logger.errorf("Message is received but there is no source message record - message UID={} ", message.getUuid());
+           logger.errorf("Message is received but there is no source message record - message UID={%d} ", message.getUuid());
        }
        logger.infof("Got a message: %d - %s", message.getName(), message.getDescription());
     }

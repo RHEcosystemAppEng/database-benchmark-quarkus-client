@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.redhat.database.benchmark.client.Message;
 import com.redhat.database.benchmark.client.amq.MessageProducerService;
-import com.redhat.database.benchmark.client.amq.MessageService;
+import com.redhat.database.benchmark.client.amq.MessageDaoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
@@ -32,7 +33,7 @@ public class BenchmarkRunner {
     MessageProducerService messageProducerService;
 
     @Inject
-    MessageService messageService;
+    MessageDaoService messageDaoService;
 
    @Inject
    ErrorDaoService errorDaoService;
@@ -40,11 +41,25 @@ public class BenchmarkRunner {
     @Inject
     StatsService statsService;
 
+    private final String smallString = "7f2kvogvshjxox7zu3qcqccnp3dhulqoc84piara8ryfxvnrb05yk";
+    private final String mediumString = "8qpgoiakys0jke2mxbpjy1hyexhjzcfjdyk8kf5xl2ck3vpzri0wp7gqnyuh8ltwj35w0tzkycvzzkdcqkvw7wzu8kbafk9ewys1o581o31qg2esl5n79d80221l";
+    private final String longString = "b7b5tvh4rf81r5xwcba3fj5ysd17f3kpqmj49r1hsrjrf867li660mvb14bfgutvdzbha8s3rqwurarqyqmtczxtn82m481dbgidh5jc16oys9b8hqeeqoxyenor2aazgbb5cglv7dc40viva3dk29wyfdk1qr34vnltmukb50cxdx76c";
+    private final String veryLongString = "zikh40hdzjhg7b38ch1js2ebtk571h7w5in7gl3bmx77k414wp3w3ysw6mewwlk47j3ebnhkwsurk0yq2hi5r3oqzo0hfgc67vplq7m2aaruow0u5v9119gbl5khnqe9cphph7w301e81rongggymqzpf2t44tdnezmpns6s8mx2o8hgw6r4wnnbpitbyjlsz1u08w3uc";
+
+    private final String[] stringMessages = {smallString, mediumString, longString, veryLongString};
 
     public String run(int durationInSeconds, int receiveWaitTimeInSeconds, int noOfThreads) throws JsonProcessingException,
             InterruptedException {
-        new Worker(durationInSeconds, noOfThreads, errorDaoService).run();
+        logger.info("Total Number of Records before deleting all messages -{}", messageDaoService.getMessagesCount());
+        messageDaoService.deleteAllMessages();
+        logger.info("Total Number of Records after deleting all messages -{}", messageDaoService.getMessagesCount());
+
+        logger.info("Total Number of Records before deleting all ERRORS -{}", errorDaoService.getErrorsCount());
+        errorDaoService.deleteAllErrors();
+        logger.info("Total Number of Records after deleting all ERRORS -{}", errorDaoService.getErrorsCount());
+        new Worker(durationInSeconds, noOfThreads).run();
         TestMetrics metrics = statsService.buildMetrics(receiveWaitTimeInSeconds);
+        messageDaoService.printTopHunMessages();
         return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(metrics);
     }
 
@@ -54,21 +69,15 @@ public class BenchmarkRunner {
         private AtomicLong itemsCounter = new AtomicLong(0);
         AtomicBoolean timerElapsed = new AtomicBoolean(false);
 
-        private ErrorDaoService errorDaoService;
-
-        private Worker(int durationInSeconds, int noOfThreads, ErrorDaoService errorDaoService) {
+        private Worker(int durationInSeconds, int noOfThreads) {
             this.durationInSeconds = durationInSeconds;
             this.noOfThreads = noOfThreads;
-            this.errorDaoService = errorDaoService;
         }
 
         private void run() throws InterruptedException {
             logger.info("Ready to run for {} seconds in {} threads", durationInSeconds,
                     noOfThreads);
             ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);
-            logger.info("Total Number of Records before deleting all messages -{}", messageService.getMessagesCount());
-            messageService.deleteAllMessages();
-            logger.info("Total Number of Records after deleting all messages -{}", messageService.getMessagesCount());
 
             Timer timer = new Timer("timer");
             timer.schedule(new TimerTask() {
@@ -102,7 +111,8 @@ public class BenchmarkRunner {
         }
 
         private Supplier<Message> newMessageData = () -> new Message(UUID.randomUUID().toString(), "Apple",
-                "Daily an apple keeps doctor away..!!");
+                stringMessages[ThreadLocalRandom.current().nextInt(0,4)])
+        ;
 
         private final DatabaseOperation newMessageSendOperation = () -> messageProducerService.send(newMessageData.get());
 
