@@ -1,9 +1,42 @@
 # AMQ Benchmark Quarkus(Java) Client
 
 ## Requirements
-* Java 11
-* Maven 3.x
+* Java 16
+* Maven 3.8.x
 * Internet accesses to download needed artifacts
+
+**Maven 3.8.x setup on RHEL**
+
+wget https://dlcdn.apache.org/maven/maven-3/3.8.4/binaries/apache-maven-3.8.4-bin.tar.gz
+tar xvf apache-maven-3.8.4-bin.tar.gz
+mv apache-maven-3.8.4  /usr/local/apache-maven
+
+export M2_HOME=/usr/local/apache-maven
+export M2=$M2_HOME/bin
+export PATH=$M2:$PATH
+
+source ~/.bashrc
+mvn -version
+
+**JDK setup on RHEL**
+
+cd /tmp
+wget https://download.java.net/java/GA/jdk16.0.1/7147401fd7354114ac51ef3e1328291f/9/GPL/openjdk-16.0.1_linux-x64_bin.tar.gz
+tar xzf openjdk-16.0.1_linux-x64_bin.tar.gz
+mv jdk-16.0.1 /opt
+
+cd /opt/jdk-16.0.1
+alternatives --install /usr/bin/java java /opt/jdk-16.0.1/bin/java 2
+
+alternatives --install /usr/bin/jar jar /opt/jdk-16.0.1/bin/jar 2
+alternatives --install /usr/bin/javac javac /opt/jdk-16.0.1/bin/javac 2
+alternatives --set jar /opt/jdk-16.0.1/bin/jar
+alternatives --set javac /opt/jdk-16.0.1/bin/javac
+
+export JAVA_HOME=/opt/jdk-16.0.1/
+export JRE_HOME=/opt/jdk-16.0.1/jre/
+export PATH=$PATH:$JAVA_HOME/bin:$JAVA_HOME/jre/bin
+
 
 ## Design notes
  * Configuration is defined in [application.properties](./src/main/resources/application.properties)
