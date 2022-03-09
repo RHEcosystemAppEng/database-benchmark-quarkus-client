@@ -2,13 +2,14 @@ package com.redhat.database.benchmark;
 
 import com.redhat.database.benchmark.client.amq.MessageDaoService;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 
-@Singleton
+@ApplicationScoped
 public class StatsService {
 
     @Inject
