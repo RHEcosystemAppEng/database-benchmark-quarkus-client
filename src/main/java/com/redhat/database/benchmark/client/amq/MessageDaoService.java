@@ -110,8 +110,6 @@ public class MessageDaoService {
     }
 
     public void printTopHunMessages() {
-
-
         try (Connection connection = h2DataSource.getConnection()) {
             final String SQL = "SELECT f.*, (f.received-f.sent) as diff FROM MESSAGES f limit 100";
             try (Statement stmt = connection.createStatement()) {

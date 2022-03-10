@@ -10,11 +10,13 @@ public class Message {
     private String uuid;
     private Timestamp sent;
     private Timestamp received;
+    private String benchmarkSeqId;
 
-    public Message(String uuid, String name, String description) {
+    public Message(String uuid, String name, String description, String benchmarkSeqId) {
         this.uuid = uuid;
         this.name = name;
         this.description = description;
+        this.benchmarkSeqId = benchmarkSeqId;
     }
 
     public String getName() {
@@ -75,5 +77,13 @@ public class Message {
     public Message setReceived(Timestamp received) {
         this.received = received;
         return this;
+    }
+
+    public String getBenchmarkSeqId() {
+        return benchmarkSeqId;
+    }
+
+    public void setBenchmarkSeqId(String benchmarkSeqId) {
+        this.benchmarkSeqId = benchmarkSeqId;
     }
 }

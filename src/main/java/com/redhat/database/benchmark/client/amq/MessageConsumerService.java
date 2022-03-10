@@ -1,5 +1,7 @@
 package com.redhat.database.benchmark.client.amq;
+import com.redhat.database.benchmark.ErrorDaoService;
 import com.redhat.database.benchmark.client.Message;
+import com.redhat.database.benchmark.client.Metadata;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
 
@@ -15,13 +17,24 @@ public class MessageConsumerService {
     @Inject
     MessageDaoService messageDaoService;
 
+    @Inject
+    ErrorDaoService errorDaoService;
+
+    @Inject
+    MetadataDaoService metadataDaoService;
+
     @Incoming("exampleQueue-in")
     public void receive(Message message) {
-        logger.info("Message is Received.. Hurray.. "+ message.getUuid());
+        Metadata metadata = metadataDaoService.getMetadata();
+        if(!metadata.getBenchmarkSeqId().equalsIgnoreCase(message.getBenchmarkSeqId())){
+            logger.info("Received an old message..message_benchmark_seq_id="+message.getBenchmarkSeqId()+", metadata_benchmark_seq_id="+metadata.getBenchmarkSeqId());
+            return;
+        }
        int updatedCount = messageDaoService.updateMessage(message.setReceived(Timestamp.from(Instant.now())));
+        logger.info("Message is Received.. Hurray.. "+ message.getUuid()+", updatedCount="+updatedCount);
        if(updatedCount == -1 || updatedCount == 0){
-           logger.errorf("Message is received but there is no source message record - message UID={%d} ", message.getUuid());
+           errorDaoService.insertError("Message is received but there is no source message record - message UID="+message.getUuid());
+           logger.error("Message is received but there is no source message record - message UID= "+message.getUuid());
        }
-       logger.infof("Got a message: %d - %s", message.getName(), message.getDescription());
     }
 }

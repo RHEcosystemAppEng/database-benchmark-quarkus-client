@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.redhat.database.benchmark.client.Message;
+import com.redhat.database.benchmark.client.Metadata;
 import com.redhat.database.benchmark.client.amq.MessageProducerService;
 import com.redhat.database.benchmark.client.amq.MessageDaoService;
+import com.redhat.database.benchmark.client.amq.MetadataDaoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +43,9 @@ public class BenchmarkRunner {
     @Inject
     StatsService statsService;
 
+    @Inject
+    MetadataDaoService metadataDaoService;
+
     private final String smallString = "7f2kvogvshjxox7zu3qcqccnp3dhulqoc84piara8ryfxvnrb05yk";
     private final String mediumString = "8qpgoiakys0jke2mxbpjy1hyexhjzcfjdyk8kf5xl2ck3vpzri0wp7gqnyuh8ltwj35w0tzkycvzzkdcqkvw7wzu8kbafk9ewys1o581o31qg2esl5n79d80221l";
     private final String longString = "b7b5tvh4rf81r5xwcba3fj5ysd17f3kpqmj49r1hsrjrf867li660mvb14bfgutvdzbha8s3rqwurarqyqmtczxtn82m481dbgidh5jc16oys9b8hqeeqoxyenor2aazgbb5cglv7dc40viva3dk29wyfdk1qr34vnltmukb50cxdx76c";
@@ -57,9 +62,13 @@ public class BenchmarkRunner {
         logger.info("Total Number of Records before deleting all ERRORS -{}", errorDaoService.getErrorsCount());
         errorDaoService.deleteAllErrors();
         logger.info("Total Number of Records after deleting all ERRORS -{}", errorDaoService.getErrorsCount());
-        new Worker(durationInSeconds, noOfThreads).run();
+
+        Metadata metadata = new Metadata();
+        metadataDaoService.insertMetadata(metadata);
+
+        new Worker(durationInSeconds, noOfThreads, metadata).run();
         TestMetrics metrics = statsService.buildMetrics(receiveWaitTimeInSeconds);
-        messageDaoService.printTopHunMessages();
+        errorDaoService.printTopHunErrors();
         return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(metrics);
     }
 
@@ -68,10 +77,12 @@ public class BenchmarkRunner {
         private int noOfThreads;
         private AtomicLong itemsCounter = new AtomicLong(0);
         AtomicBoolean timerElapsed = new AtomicBoolean(false);
+        private Metadata metadata;
 
-        private Worker(int durationInSeconds, int noOfThreads) {
+        private Worker(int durationInSeconds, int noOfThreads, Metadata metadata) {
             this.durationInSeconds = durationInSeconds;
             this.noOfThreads = noOfThreads;
+            this.metadata = metadata;
         }
 
         private void run() throws InterruptedException {
@@ -103,7 +114,7 @@ public class BenchmarkRunner {
                         newMessageSendOperation.execute();
                     } catch (Exception e) {
                         logger.error("Failed to run: {}", e.getMessage());
-                        errorDaoService.insertError(e.getMessage());
+                        errorDaoService.insertError("Failed to submit message - "+e.getMessage());
                     }
                 }
                 return null;
@@ -111,8 +122,7 @@ public class BenchmarkRunner {
         }
 
         private Supplier<Message> newMessageData = () -> new Message(UUID.randomUUID().toString(), "Apple",
-                stringMessages[ThreadLocalRandom.current().nextInt(0,4)])
-        ;
+                stringMessages[ThreadLocalRandom.current().nextInt(0,4)], metadata.getBenchmarkSeqId());
 
         private final DatabaseOperation newMessageSendOperation = () -> messageProducerService.send(newMessageData.get());
 
