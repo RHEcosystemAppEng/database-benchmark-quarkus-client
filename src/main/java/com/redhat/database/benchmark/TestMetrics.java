@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import lombok.Data;
 
+import java.sql.Timestamp;
+
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 @JsonPropertyOrder
 @Data
@@ -19,6 +21,11 @@ public class TestMetrics {
     private long totalMessagesSent;
 
     private String message;
+
+    private Timestamp producerStartTime;
+    private Timestamp producerEndTime;
+    private Timestamp consumerEndTime;
+    private long consumerWaitTime;
 
     public long getTotalMessagesSent() {
         return totalMessagesSent;
@@ -66,5 +73,49 @@ public class TestMetrics {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public void setMessagesReceived(long messagesReceived) {
+        this.messagesReceived = messagesReceived;
+    }
+
+    public void setNoOfFailures(long noOfFailures) {
+        this.noOfFailures = noOfFailures;
+    }
+
+    public void setElapsedTimeMillis(long elapsedTimeMillis) {
+        this.elapsedTimeMillis = elapsedTimeMillis;
+    }
+
+    public Timestamp getProducerStartTime() {
+        return producerStartTime;
+    }
+
+    public void setProducerStartTime(Timestamp producerStartTime) {
+        this.producerStartTime = producerStartTime;
+    }
+
+    public Timestamp getProducerEndTime() {
+        return producerEndTime;
+    }
+
+    public void setProducerEndTime(Timestamp producerEndTime) {
+        this.producerEndTime = producerEndTime;
+    }
+
+    public Timestamp getConsumerEndTime() {
+        return consumerEndTime;
+    }
+
+    public void setConsumerEndTime(Timestamp consumerEndTime) {
+        this.consumerEndTime = consumerEndTime;
+    }
+
+    public long getConsumerWaitTime() {
+        return consumerWaitTime;
+    }
+
+    public void setConsumerWaitTime(long consumerWaitTime) {
+        this.consumerWaitTime = consumerWaitTime;
     }
 }

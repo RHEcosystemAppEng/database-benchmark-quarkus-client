@@ -28,13 +28,17 @@ public class StatsService {
     public TestMetrics buildMetrics(int receiveWaitTimeInSeconds) throws InterruptedException {
         final Metadata metadata = metadataDaoService.getMetadata();
 
-        Instant producerEndTime = Instant.now();
+
         performConsumerSleepWaitTime(receiveWaitTimeInSeconds);
         logger.info("Consumer wait is done and going to generate metrics now.");
         Instant consumerEndTime = Instant.now();
         TestMetrics metrics = new TestMetrics();
-        Duration testDuration = Duration.between(metadata.getStartTime().toInstant(), producerEndTime);
+        Duration testDuration = Duration.between(metadata.getStartTime().toInstant(), metadata.getEndTime().toInstant());
         long messagesReceived = messageDaoService.getNumberOfMessagesReceived(Timestamp.from(consumerEndTime));
+
+        metrics.setProducerStartTime(metadata.getStartTime());
+        metrics.setProducerEndTime(metadata.getEndTime());
+        metrics.setConsumerEndTime(Timestamp.from(consumerEndTime));
 
         metrics.setMessagesReceived(messagesReceived);
         metrics.setTotalMessagesSent(messageDaoService.getMessagesCount());
