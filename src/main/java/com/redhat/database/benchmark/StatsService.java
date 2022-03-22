@@ -30,6 +30,7 @@ public class StatsService {
 
         Instant producerEndTime = Instant.now();
         performConsumerSleepWaitTime(receiveWaitTimeInSeconds);
+        logger.info("Consumer wait is done and going to generate metrics now.");
         Instant consumerEndTime = Instant.now();
         TestMetrics metrics = new TestMetrics();
         Duration testDuration = Duration.between(metadata.getStartTime().toInstant(), producerEndTime);

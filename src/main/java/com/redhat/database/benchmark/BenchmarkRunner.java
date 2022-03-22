@@ -69,8 +69,11 @@ public class BenchmarkRunner {
         metadataDaoService.updateMetadata(metadata);
 
         TestMetrics metrics = statsService.buildMetrics(receiveWaitTimeInSeconds);
+        logger.info("Printing top errors.");
         errorDaoService.printTopHunErrors();
-        return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(metrics);
+        String metricsResult = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(metrics);
+        logger.info("Metrics Result:"+metricsResult);
+        return metricsResult;
     }
 
     private class Worker {
