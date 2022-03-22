@@ -14,7 +14,7 @@ public class JsonToObjectConverter implements MessageConverter {
     @Override
     public boolean canConvert(Message<?> in, Type target) {
         return in.getMetadata(IncomingAmqpMetadata.class)
-                .map(meta -> meta.getContentType().equals("application/json") && target instanceof Class)
+                .map(meta -> meta != null && meta.getContentType() != null && meta.getContentType().equals("application/json") && target instanceof Class)
                 .orElse(false);
 
     }
