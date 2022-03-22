@@ -18,6 +18,8 @@ public class TestMetrics {
     private long elapsedTimeMillis;
     private long totalMessagesSent;
 
+    private String message;
+
     public long getTotalMessagesSent() {
         return totalMessagesSent;
     }
@@ -56,5 +58,13 @@ public class TestMetrics {
 
     public void setMessagesReceivedPerSecond(double messagesReceivedPerSecond) {
         this.messagesReceivedPerSecond = messagesReceivedPerSecond;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

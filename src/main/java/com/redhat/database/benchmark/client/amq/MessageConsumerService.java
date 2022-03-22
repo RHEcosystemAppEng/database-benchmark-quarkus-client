@@ -26,15 +26,15 @@ public class MessageConsumerService {
     @Incoming("exampleQueue-in")
     public void receive(Message message) {
         Metadata metadata = metadataDaoService.getMetadata();
-        if(!metadata.getBenchmarkSeqId().equalsIgnoreCase(message.getBenchmarkSeqId())){
+        if(metadata == null || !metadata.getBenchmarkSeqId().equalsIgnoreCase(message.getBenchmarkSeqId())){
             logger.info("Received an old message..message_benchmark_seq_id="+message.getBenchmarkSeqId()+", metadata_benchmark_seq_id="+metadata.getBenchmarkSeqId());
             return;
         }
        int updatedCount = messageDaoService.updateMessage(message.setReceived(Timestamp.from(Instant.now())));
         logger.info("Message is Received.. Hurray.. "+ message.getUuid()+", updatedCount="+updatedCount);
-       if(updatedCount == -1 || updatedCount == 0){
-           errorDaoService.insertError("Message is received but there is no source message record - message UID="+message.getUuid());
-           logger.error("Message is received but there is no source message record - message UID= "+message.getUuid());
+       if(updatedCount != 1){
+           errorDaoService.insertError("Message is received but updatedCount is not 1 - message UID="+message.getUuid()+", updatedCount"+updatedCount);
+           logger.error("Message is received but updatedCount is not 1. There is no source message record - message UID= "+message.getUuid());
        }
     }
 }

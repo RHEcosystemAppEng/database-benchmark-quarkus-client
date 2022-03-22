@@ -187,4 +187,25 @@ public class MessageDaoService {
         return rowCount;
     }
 
+    public boolean hasAllMessagesReceived() {
+        int rowCount = 0;
+        try (Connection connection = h2DataSource.getConnection()) {
+            final String SQL = "SELECT count(*) as NOT_RECEIVED_MESS_COUNT FROM MESSAGES WHERE RECEIVED IS NULL";
+            try (Statement stmt = connection.createStatement()) {
+                ResultSet resultSet = stmt.executeQuery(SQL);
+                while (resultSet.next()) {
+                    rowCount = resultSet.getInt("NOT_RECEIVED_MESS_COUNT");
+                }
+            } catch (SQLException e) {
+                logger.error("Error processing updateMessage statement", e);
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            logger.error("Error processing updateMessage connection", e);
+            throw new RuntimeException(e);
+        }
+
+        return (rowCount == 0);
+    }
+
 }

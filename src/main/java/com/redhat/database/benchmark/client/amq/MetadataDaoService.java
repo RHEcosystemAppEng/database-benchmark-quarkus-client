@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.sql.*;
+import java.time.Instant;
 
 @Singleton
 public class MetadataDaoService {
@@ -72,7 +73,7 @@ public class MetadataDaoService {
             final String SQL = " INSERT INTO METADATA(benchmarkseqid, starttime) VALUES(?, ?) ";
             try (PreparedStatement stmt = connection.prepareStatement(SQL)) {
                 stmt.setString(1,metadata.getBenchmarkSeqId());
-                stmt.setTimestamp(2, metadata.getStartTime());
+                stmt.setTimestamp(2, metadata.getStartTime() == null ? Timestamp.from(Instant.now()) : metadata.getStartTime());
                 int result = stmt.executeUpdate();
                 logger.info("metadata is inserted to h2={}",result);
             } catch (SQLException e) {
@@ -92,7 +93,7 @@ public class MetadataDaoService {
         try (Connection connection = h2DataSource.getConnection()) {
             final String SQL = "UPDATE METADATA SET endtime=? WHERE benchmarkseqid=? ";
             try (PreparedStatement stmt = connection.prepareStatement(SQL)) {
-                stmt.setTimestamp(1,metadata.getEndTime());
+                stmt.setTimestamp(1, metadata.getEndTime() == null ? Timestamp.from(Instant.now()) : metadata.getEndTime());
                 stmt.setString(2, metadata.getBenchmarkSeqId());
                 result = stmt.executeUpdate();
                 logger.info("metadata is updated in h2 database ={}",result);

@@ -65,8 +65,9 @@ public class BenchmarkRunner {
 
         Metadata metadata = new Metadata();
         metadataDaoService.insertMetadata(metadata);
-
         new Worker(durationInSeconds, noOfThreads, metadata).run();
+        metadataDaoService.updateMetadata(metadata);
+
         TestMetrics metrics = statsService.buildMetrics(receiveWaitTimeInSeconds);
         errorDaoService.printTopHunErrors();
         return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(metrics);
